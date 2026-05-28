@@ -1,7 +1,6 @@
 # GodsEye
-
 GodsEye is a multi-agent prediction market analysis app built around Polymarket. It imports live markets, generates claims, creates a simulated society of forecasters, runs a belief-updating simulation, and lets you inspect the result through an interactive globe, replay view, and report flow.
-
+[![Watch the demo](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=scFPqslbpVo)
 ## What It Does
 
 - Imports live Polymarket markets
