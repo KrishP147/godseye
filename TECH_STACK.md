@@ -387,7 +387,7 @@ Recommended Next.js frontend structure:
 1. Read TECH_STACK_FINAL.md (this document)
 2. Reference ARCHITECTURE_FLOW.md when pieces need to connect
 3. Review PLAN.md for the build plan
-4. Check PROJECT_OVERVIEW.md and TEAM_DIVISION.md for context
+4. Check PROJECT_OVERVIEW.md for context
 5. Set up API keys before hackathon starts
 6. Initialize projects (backend + frontend) before hackathon
 

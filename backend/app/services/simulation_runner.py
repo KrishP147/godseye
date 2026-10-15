@@ -29,7 +29,7 @@ from app.services.world_builder import AgentRecord
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# Constants (from SHARED_CONTRACTS.md §2)
+# Shared constants (keep in sync with the frontend)
 # ---------------------------------------------------------------------------
 TOTAL_TICKS: int = 30
 VISIBLE_CLAIMS_PER_STANCE: int = 4
@@ -49,7 +49,7 @@ AGENT_LLM_TIMEOUT_SECONDS: float = float(os.getenv("SIM_AGENT_TIMEOUT_SECONDS", 
 
 @dataclass
 class Claim:
-    """Mirrors ClaimSchema from SHARED_CONTRACTS.md §3."""
+    """Mirrors ClaimSchema in the backend API schemas."""
 
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     text: str = ""

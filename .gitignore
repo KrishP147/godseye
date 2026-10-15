@@ -69,3 +69,11 @@ Thumbs.db
 
 # Local tooling
 .superpowers/
+
+# Agent tooling, editor settings, internal team docs (kept local)
+.zed/
+docs/superpowers/
+person1/
+TEAM_DIVISION.md
+DUMMY_EXPLANATION.md
+SHARED_CONTRACTS.md
