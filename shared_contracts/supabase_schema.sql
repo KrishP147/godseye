@@ -1,8 +1,5 @@
 -- Supabase / Postgres schema for the shared backend models.
--- Source-of-truth priority used here:
--- 1. SHARED_CONTRACTS.md
--- 2. TEAM_DIVISION.md
--- 3. ARCHITECTURE_FLOW.md
+-- See ARCHITECTURE_FLOW.md for how these tables fit the pipeline.
 --
 -- Key resolution:
 -- - Column names use `session_id` everywhere.

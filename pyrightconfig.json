@@ -1,5 +1,5 @@
 {
-  "venvPath": "/Users/sunny/godseye/backend",
-  "venv": "venv",
+  "venvPath": "backend",
+  "venv": ".venv",
   "extraPaths": ["backend"]
 }

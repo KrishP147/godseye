@@ -24,7 +24,7 @@ from app.core.llm_client import (
 )
 
 # ---------------------------------------------------------------------------
-# Constants (from SHARED_CONTRACTS.md §2)
+# Shared constants (keep in sync with the frontend)
 # ---------------------------------------------------------------------------
 TOTAL_AGENTS = 12
 ARCHETYPES = [
@@ -55,7 +55,7 @@ class ProfessionalBackground:
 
 @dataclass
 class AgentRecord:
-    """Mirrors the Agent DB model fields from SHARED_CONTRACTS.md."""
+    """Mirrors the Agent DB model fields."""
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     simulation_id: str = ""
     name: str = ""
