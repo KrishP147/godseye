@@ -1,5 +1,5 @@
 -- Supabase / Postgres schema for the shared backend models.
--- See ARCHITECTURE_FLOW.md for how these tables fit the pipeline.
+-- See docs/planning/ARCHITECTURE_FLOW.md for how these tables fit the pipeline.
 --
 -- Key resolution:
 -- - Column names use `session_id` everywhere.
