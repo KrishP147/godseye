@@ -1,5 +1,5 @@
 """
-Simulation Runner — Person 3
+Simulation Runner
 
 Core 30-tick simulation engine. Each tick:
   1. Select visible claims (top 4 yes + top 4 no by rank score)
@@ -43,7 +43,7 @@ FACTION_THRESHOLD: float = 0.08
 AGENT_LLM_TIMEOUT_SECONDS: float = float(os.getenv("SIM_AGENT_TIMEOUT_SECONDS", "8"))
 
 # ---------------------------------------------------------------------------
-# Data structures (swap to DB models / Pydantic schemas when Person 1 commits)
+# Data structures
 # ---------------------------------------------------------------------------
 
 
@@ -124,7 +124,7 @@ class SimulationResult:
 
 
 # ---------------------------------------------------------------------------
-# Stub claims fallback (used when Person 2's claims_generator isn't ready)
+# Stub claims fallback (used when no generated claims are available)
 # ---------------------------------------------------------------------------
 
 def _generate_stub_claims() -> list[Claim]:

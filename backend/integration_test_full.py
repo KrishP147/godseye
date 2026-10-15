@@ -1,9 +1,9 @@
 """
-Full System Integration Test — Person 1 + Person 2 + Person 3
+Full system integration test.
 Tests the complete pipeline end-to-end:
-  P1: market import
-  P2: claims generation
-  P3: world build → simulation → report
+  1. market import
+  2. claims generation
+  3. world build → simulation → report
 
 Run from backend/:  python integration_test_full.py
 """
@@ -52,9 +52,9 @@ async def run() -> None:
     session_id: UUID | None = None
     simulation_id: UUID | None = None
 
-    # ── 1. Person 1: import market ─────────────────────────────────────────────
+    # ── 1. Import market ───────────────────────────────────────────────────────
     print(f"\n{SEP}")
-    print("STEP 1 — P1: import_market")
+    print("STEP 1 — import_market")
     print(SEP)
     try:
         async with factory() as db:
@@ -73,14 +73,14 @@ async def run() -> None:
         print("  PASS")
     except Exception as exc:
         print(f"  FAIL: {exc}")
-        failures.append("p1-import-market")
+        failures.append("import-market")
         await engine.dispose()
         _print_summary(failures, TOTAL_STEPS)
         return
 
-    # ── 2. Person 2: generate claims ───────────────────────────────────────────
+    # ── 2. Generate claims ─────────────────────────────────────────────────────
     print(f"\n{SEP}")
-    print("STEP 2 — P2: claims_generator.generate")
+    print("STEP 2 — claims_generator.generate")
     print(SEP)
     claims_response = None
     try:
@@ -111,29 +111,29 @@ async def run() -> None:
         print("  PASS")
     except Exception as exc:
         print(f"  FAIL: {exc}")
-        failures.append("p2-generate-claims")
+        failures.append("generate-claims")
         await engine.dispose()
         _print_summary(failures, TOTAL_STEPS)
         return
 
-    # ── 3. Seam P1→P2: session_id consistency ──────────────────────────────────
+    # ── 3. Seam import→claims: session_id consistency ─────────────────────────────
     print(f"\n{SEP}")
-    print("STEP 3 — Seam P1→P2: session_id matches")
+    print("STEP 3 — Seam import→claims: session_id matches")
     print(SEP)
     try:
         check(
             claims_response.session_id == session_id,
-            f"session_id mismatch: P1={session_id}, P2={claims_response.session_id}",
+            f"session_id mismatch: import={session_id}, claims={claims_response.session_id}",
         )
         print(f"  Both systems share session_id: {session_id}")
         print("  PASS")
     except Exception as exc:
         print(f"  FAIL: {exc}")
-        failures.append("seam-p1-p2-session-id")
+        failures.append("seam-import-claims-session-id")
 
-    # ── 4. Person 3: build world (create simulation + agents) ──────────────────
+    # ── 4. Build world (create simulation + agents) ────────────────────────────
     print(f"\n{SEP}")
-    print("STEP 4 — P3: build simulation world (12 agents)")
+    print("STEP 4 — build simulation world (12 agents)")
     print(SEP)
     try:
         from decimal import Decimal
@@ -210,14 +210,14 @@ async def run() -> None:
         print("  PASS")
     except Exception as exc:
         print(f"  FAIL: {exc}")
-        failures.append("p3-build-world")
+        failures.append("build-world")
         await engine.dispose()
         _print_summary(failures, TOTAL_STEPS)
         return
 
-    # ── 5. Person 3: run simulation (30 ticks) + generate report ───────────────
+    # ── 5. Run simulation (30 ticks) + generate report ─────────────────────────
     print(f"\n{SEP}")
-    print("STEP 5 — P3: run simulation (30 ticks) + generate report")
+    print("STEP 5 — run simulation (30 ticks) + generate report")
     print("  (This runs the full 30-tick multi-agent deliberation — may take a few minutes)")
     print(SEP)
     result = None
@@ -258,7 +258,7 @@ async def run() -> None:
         print("  PASS")
     except Exception as exc:
         print(f"  FAIL: {exc}")
-        failures.append("p3-run-simulation")
+        failures.append("run-simulation")
         await engine.dispose()
         _print_summary(failures, TOTAL_STEPS)
         return
@@ -325,28 +325,28 @@ async def run() -> None:
         print(f"  FAIL: {exc}")
         failures.append("db-report-persisted")
 
-    # ── 8. Seam P2→P3: claims fed into simulation ──────────────────────────────
+    # ── 8. Seam claims→simulation: claims fed in ───────────────────────────────
     print(f"\n{SEP}")
-    print("STEP 8 — Seam P2→P3: P2 claim IDs flow into simulation tick_data")
+    print("STEP 8 — Seam claims→simulation: generated claim IDs flow into tick_data")
     print(SEP)
     try:
-        p2_claim_ids = {str(c.id) for c in claims_response.claims}
+        generated_claim_ids = {str(c.id) for c in claims_response.claims}
         sim_claim_ids: set[str] = set()
         for snap in result.tick_data:
             for cs in snap.claim_shares:
                 sim_claim_ids.add(cs.claim_id)
 
-        overlap = p2_claim_ids & sim_claim_ids
+        overlap = generated_claim_ids & sim_claim_ids
         if len(sim_claim_ids) == 0:
             # Agents statistically chose update_belief every tick — not a bug
-            print(f"  {len(p2_claim_ids)} P2 claims available; agents chose update_belief every tick (0 shares) — OK")
+            print(f"  {len(generated_claim_ids)} generated claims available; agents chose update_belief every tick (0 shares) — OK")
         else:
-            print(f"  {len(p2_claim_ids)} P2 claims → {len(sim_claim_ids)} unique claims shared in simulation")
-            print(f"  {len(overlap)} claim IDs appear in both P2 output and simulation")
+            print(f"  {len(generated_claim_ids)} generated claims → {len(sim_claim_ids)} unique claims shared in simulation")
+            print(f"  {len(overlap)} claim IDs appear in both generated claims and simulation")
         print("  PASS")
     except Exception as exc:
         print(f"  FAIL: {exc}")
-        failures.append("seam-p2-p3-claims")
+        failures.append("seam-claims-simulation")
 
     # ── 9. Idempotency: re-import same URL returns same market + session ────────
     print(f"\n{SEP}")

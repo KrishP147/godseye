@@ -1,5 +1,5 @@
 """
-Report Agent — Person 3
+Report Agent
 
 Generates the final analysis report after a simulation completes.
 
@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class ReportData:
-    """Internal report data matching Person 1's Report DB model fields."""
+    """Internal report data matching the Report DB model fields."""
 
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     simulation_id: str = ""

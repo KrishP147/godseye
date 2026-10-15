@@ -1,5 +1,5 @@
 """
-Smoke test — Person 2 live LLM integrations.
+Smoke test for live LLM integrations.
 Run from backend/:  python smoke_test_llm.py
 """
 
@@ -80,7 +80,7 @@ async def test_apollo() -> None:
 
 
 async def main() -> None:
-    print("Person 2 — Live LLM Smoke Test")
+    print("Live LLM Smoke Test")
 
     failures: list[str] = []
 

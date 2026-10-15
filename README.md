@@ -1,165 +1,143 @@
 # GodsEye
-GodsEye is a multi-agent prediction market analysis app built around Polymarket. It imports live markets, generates claims, creates a simulated society of forecasters, runs a belief-updating simulation, and lets you inspect the result through an interactive globe, replay view, and report flow.
+
+A multi-agent simulation that pits AI forecaster personas against live Polymarket markets and flags bets that may be mispriced.
+
+2nd place out of 212 teams in the Polymarket-sponsored Prediction Markets track at YHack 2026 (648 participants).
+
+[Devpost](https://devpost.com/software/godseye-uwma5h) · [Demo video](https://www.youtube.com/watch?v=scFPqslbpVo) · [Project write-up](https://www.krishpunjabi.com/projects/godseye)
+
 <div align="center">
   <a href="https://www.youtube.com/watch?v=scFPqslbpVo" target="_blank">
-    <img src="https://img.youtube.com/vi/scFPqslbpVo/maxresdefault.jpg" alt="GodsEye Demo Video" width="560" height="315">
+    <img src="https://img.youtube.com/vi/scFPqslbpVo/maxresdefault.jpg" alt="GodsEye demo video" width="560">
   </a>
-  <p><em>Click the image above to watch the demo video</em></p>
+  <p><em>Click to watch the demo</em></p>
 </div>
-## What It Does
 
-- Imports live Polymarket markets
-- Shows active markets on a globe-first discovery UI
-- Generates claims and evidence for a market
-- Builds a panel of AI forecasters with distinct styles
-- Runs a multi-tick simulation of belief updates and claim sharing
-- Produces a report comparing market probability vs. simulation probability
-- Supports paper trading against report outcomes
+## What it does
+
+A market price tells you what traders think but not why. GodsEye takes a live Polymarket question, builds a small society of forecasters with different reasoning styles, lets them argue over the same evidence and shows where their consensus lands compared to the market.
+
+- Browse live Polymarket events on a 3D globe or paste a market URL
+- Generate a pool of claims and evidence for and against the outcome
+- Build 12 forecaster personas across 6 styles (Bayesian updater, trend follower, contrarian, data skeptic, narrative focused, quantitative analyst), grounded in real professional profiles from Apollo where available
+- Run a 30-tick simulation where agents update beliefs, share claims and adjust trust in each other
+- Replay the run tick by tick with a debate feed, belief chart and trust network
+- Read a report comparing the market probability with the simulated one, and paper trade against it
+
+## How it works
+
+```text
+Polymarket URL or globe pick
+        │
+        ▼
+ Market import ──► Claims generator ──► World builder ──► Simulation runner ──► Report agent
+ (Gamma API)        (Gemini)            (Apollo + K2)     (30 ticks, Gemini)    (K2 + Gemini)
+        │                                                        │                    │
+        └──────────────── PostgreSQL / Supabase ◄─────────────────┴────────────────────┘
+                                   │
+                                   ▼
+                 Next.js frontend: globe, replay, debate feed, trust network, report
+```
+
+1. The backend pulls market metadata and the current price from Polymarket's Gamma API.
+2. An LLM writes a shared pool of claims with evidence on both sides.
+3. The world builder creates 12 agents, each with a persona, a starting belief and trust scores toward the others.
+4. Each tick, every agent sees a slice of the claims plus anything other agents shared with it, then either updates its belief or shares a claim. Trust and factions update as the run goes.
+5. A report agent plans, drafts and self-critiques a write-up of the run, including the gap between the simulated probability and the market.
+6. The frontend replays the run and renders the report. Supabase realtime pushes updates when configured.
 
 ## Stack
 
-### Frontend
+**Frontend:** Next.js 16, React 19, TypeScript, Three.js with React Three Fiber, TanStack Query, D3 and Recharts, Tailwind CSS, Supabase realtime
 
-- Next.js 16
-- React 19
-- TypeScript
-- Three.js / React Three Fiber
-- Supabase client
+**Backend:** Python 3.12, FastAPI, async SQLAlchemy with asyncpg, PostgreSQL on Supabase, httpx, LiteLLM
 
-### Backend
+**Models and data:** K2 Think and Gemini for reasoning and generation, Apollo for persona profiles (Gemini and Apollo through the Lava gateway), Polymarket Gamma API for markets
 
-- FastAPI
-- SQLAlchemy async
-- PostgreSQL / Supabase
-- httpx
-- LiteLLM
-- Lava-backed Gemini + Apollo access
+## Run it locally
 
-## Repo Layout
-
-```text
-backend/    FastAPI API, services, schemas, tests
-frontend/   Next.js app, globe UI, simulation and report pages
-docs/       Specs and supporting design docs
-```
-
-## Main Flow
-
-1. A user pastes a Polymarket URL or browses a live event.
-2. The backend imports market metadata and current probability.
-3. Claims are generated for the market question.
-4. A simulation world is built with multiple forecast agents.
-5. The simulation runs and tracks belief, confidence, trust, and faction changes.
-6. The frontend renders the replay and report views.
-
-## Prerequisites
-
-- Node.js current LTS
-- npm
-- Python 3.12
-- A PostgreSQL database or Supabase project
-
-## Environment Variables
+You need Node.js (current LTS), Python 3.12 and a PostgreSQL database (a free Supabase project works). The schema is in `shared_contracts/supabase_schema.sql`.
 
 ### Backend
-
-Create `backend/.env` with the values you need for local development.
-
-```env
-DATABASE_URL=postgresql://...
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_KEY=...
-LAVA_API_KEY=...
-K2_API_KEY=...
-POLYMARKET_GAMMA_BASE_URL=https://gamma-api.polymarket.com
-```
-
-Useful notes:
-
-- `DATABASE_URL` can be `postgresql://...`; the app normalizes it to the async SQLAlchemy driver.
-- `LAVA_API_KEY` is required for Gemini and Apollo-backed calls.
-- `K2_API_KEY` is needed for `k2-think` model calls.
-- If `SUPABASE_URL` and keys are missing, some live database-backed features will not work.
-
-### Frontend
-
-Create `frontend/.env`:
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:5001
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-```
-
-If Supabase env vars are missing, the frontend falls back to a no-op realtime client instead of crashing.
-
-## Local Setup
-
-### 1. Start the backend
 
 ```bash
 cd backend
 python -m venv .venv
-```
-
-Activate the virtual environment:
-
-```bash
-# PowerShell
-.venv\Scripts\Activate.ps1
-
-# bash
-source .venv/Scripts/activate
-```
-
-Install dependencies and run the API:
-
-```bash
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+cp .env.example .env             # then fill in DATABASE_URL, LAVA_API_KEY and K2_API_KEY
 uvicorn app.main:app --reload --port 5001
 ```
 
-The API will be available at `http://localhost:5001`.
+The API runs at `http://localhost:5001`. Check it with `GET /healthz`.
 
-### 2. Start the frontend
+### Frontend
 
 ```bash
 cd frontend
 npm install
+cp .env.example .env.local       # NEXT_PUBLIC_API_URL defaults to http://localhost:5001
 npm run dev
 ```
 
-The app will be available at `http://localhost:3000`.
+Open `http://localhost:3000`. To see the replay and report screens without a backend, open `/simulation/mock` or `/reports/mock`. Supabase keys are optional on the frontend; without them realtime is off and pages fall back to polling.
 
-## Important Routes
-
-- `GET /healthz` - backend healthcheck
-- `POST /api/markets/import` - import a Polymarket market
-- `GET /api/markets/browse` - browse live Polymarket events
-- `POST /api/markets/refresh` - refresh the browse cache
-- `POST /api/sessions/{market_id}/claims/generate` - generate claims
-- `POST /api/simulations/build-world` - create a simulation
-- `POST /api/simulations/{simulation_id}/start` - start a simulation
-- `GET /api/reports/{simulation_id}` - fetch a report
-
-## Development Notes
-
-- The browse feed is cached in memory on the backend for one hour unless explicitly refreshed.
-- The frontend globe can still render with fallback data if the backend is unavailable.
-- The app uses `NEXT_PUBLIC_API_URL` to decide which backend to call.
-- The backend loads env vars from the repo root `.env` and `backend/.env`, with `backend/.env` taking precedence.
-
-## Verification
-
-Frontend:
+### Tests
 
 ```bash
-cd frontend
-npm run build
+cd backend
+python -m pytest
 ```
 
-Backend tests and smoke checks live under `backend/tests/` plus the integration scripts in `backend/`.
+Some route and integration tests need a database and live API keys and will fail or error without them. `integration_test_full.py` and `smoke_test_llm.py` in `backend/` run the full pipeline and the LLM calls against real services.
 
-## Current Branding
+## Main API routes
 
-The app title and UI branding use `GodsEye`.
+| Method | Route | Purpose |
+| --- | --- | --- |
+| GET | `/healthz` | Health check |
+| GET | `/api/markets/browse` | Live Polymarket events (cached for an hour) |
+| POST | `/api/markets/refresh` | Refresh the browse cache |
+| POST | `/api/markets/import` | Import a market from a Polymarket URL |
+| POST | `/api/sessions/{market_id}/claims/generate` | Generate claims |
+| POST | `/api/simulations/build-world` | Create a simulation and its agents |
+| POST | `/api/simulations/{id}/start` | Run the simulation in the background |
+| GET | `/api/simulations/{id}` | Simulation state and tick data |
+| GET | `/api/reports/{simulation_id}` | Final report |
+
+## Project structure
+
+```text
+backend/
+  app/
+    api/routes/     FastAPI routes (markets, claims, simulations, reports, paper trading)
+    core/           config, database and the LLM client
+    models/         SQLAlchemy models
+    schemas/        Pydantic request and response models
+    services/       Polymarket client, claims generator, Apollo personas, world builder,
+                    simulation runner, report agent
+    workers/        background pipeline that ties the services together
+  tests/
+frontend/
+  app/              pages: globe home, simulation replay, report
+  components/       globe, replay, debate feed, trust network, belief chart, paper trading
+  lib/              API client, types, Supabase client, mock data
+shared_contracts/   database schema
+docs/planning/      design docs written before and during the hackathon
+```
+
+The docs in `docs/planning/` were the team's plan going in. The code changed during the build, so treat them as background rather than a spec.
+
+## Limitations
+
+- This is a hackathon project built over one weekend. It has not been hardened for production.
+- Nothing has been backtested. The gap between the simulated and market probability is a prompt for a closer look, not evidence of a mispricing or a trading signal.
+- Results depend on the LLMs and prompts and will vary between runs.
+- Paper trading is simulated. Orders are signed with a Phantom wallet to tie them to an address, but no funds move and nothing reaches Polymarket.
+- Running a simulation makes many LLM calls and needs your own API keys.
+
+## Team
+
+Built at YHack 2026 by [Sunny Wu](https://github.com/sxnnywu), [Kevin Wang](https://github.com/k3vinwvng), [Hamza Ammar](https://github.com/hamzakammar) and [Krish Punjabi](https://github.com/KrishP147).
+
+Krish led the frontend (the 3D globe, simulation replay, debate feed and trust network visualization) and wrote about 55% of the code. The original team repo is [sxnnywu/godseye](https://github.com/sxnnywu/godseye); this is Krish's fork.
