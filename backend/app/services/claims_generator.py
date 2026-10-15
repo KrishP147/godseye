@@ -1,8 +1,8 @@
 """
-Claims Generator Service — Person 2
+Claims Generator Service
 
 Generates structured claims for a market using Gemini Pro.
-Person 1 wires this service into the fixed claims route and persists the result.
+The claims route calls this service and persists the result.
 """
 
 from __future__ import annotations

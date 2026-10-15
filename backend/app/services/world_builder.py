@@ -1,10 +1,10 @@
 """
-World Builder — Person 3
+World Builder
 
 Creates 12 agents (2 per archetype) for a simulation.
 Uses Apollo.io enrichment if available, falls back to K2 Think synthetic profiles.
 
-Usage (wired by Person 1 into POST /api/simulations/build-world):
+Usage (wired into POST /api/simulations/build-world):
     from app.services.world_builder import world_builder
     agents = await world_builder.build_world(session_id=..., simulation_id=..., market_question=...)
 """
@@ -42,7 +42,7 @@ INITIAL_TRUST_MIN = 0.4
 INITIAL_TRUST_MAX = 0.8
 
 # ---------------------------------------------------------------------------
-# Local stand-in types (swap to real DB models when Person 1 commits them)
+# Local dataclasses (mapped to DB models when persisted)
 # ---------------------------------------------------------------------------
 
 @dataclass
@@ -137,7 +137,7 @@ class WorldBuilder:
         2. Fall back to K2 Think synthetic profiles if Apollo returns < 6.
         3. Assign archetypes, initial beliefs, and trust scores.
 
-        Returns a list of AgentRecord objects ready to be persisted by Person 1's
+        Returns a list of AgentRecord objects ready to be persisted by the
         DB layer.
         """
         # --- Step 1: get professional backgrounds ---
@@ -202,7 +202,7 @@ class WorldBuilder:
         return await self._get_synthetic_profiles(market_question)
 
     async def _get_apollo_profiles(self, market_question: str) -> list[ProfessionalBackground]:
-        """Use Person 2's apollo_service to find real professionals."""
+        """Use apollo_service to find real professionals."""
         try:
             from app.services.apollo_service import apollo_service
             profiles_raw = await apollo_service.get_relevant_professionals(

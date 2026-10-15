@@ -76,7 +76,7 @@ class LLMClient:
     """
 
     def __init__(self) -> None:
-        # Prefer the env names defined in TECH_STACK.md, but keep backward
+        # Prefer the documented env names (see .env.example), but keep backward
         # compatibility with the original stub names.
         self._lava_api_key: str = os.getenv("LAVA_API_KEY") or os.getenv("LAVA_KEY", "")
         self._together_api_key: str = os.getenv("TOGETHER_API_KEY") or os.getenv(

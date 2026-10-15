@@ -442,8 +442,8 @@ function ReportCard({
   );
 }
 
-// TODO: Replace this generated visual block with backend-provided market imagery
-// once the report payload exposes report_image_url or visual theme metadata.
+// Generated visual block. The report payload does not include market imagery,
+// so this is drawn from the probabilities alone.
 function ReportVisual({
   marketProbability,
   simulationProbability,

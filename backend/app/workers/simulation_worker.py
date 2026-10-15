@@ -1,12 +1,12 @@
 """
-Simulation Worker — Person 3
+Simulation Worker
 
 Orchestrator that runs the full pipeline with DB integration:
   1. world_builder.build_world()  → 12 agents  → persist to DB
   2. simulation_runner.run()      → 30-tick sim → persist tick_data + claim_shares
   3. report_agent.generate()      → final report → persist to DB
 
-Usage (wired by Person 1 into POST /api/simulations/{id}/start):
+Usage (wired into POST /api/simulations/{id}/start):
     from app.workers.simulation_worker import run_simulation
     asyncio.create_task(run_simulation(simulation_id=..., session_id=..., market_question=...))
 
@@ -407,7 +407,7 @@ async def _persist_tick(
 # ---------------------------------------------------------------------------
 
 def _convert_tick_data(tick_data: list[TickSnapshot]) -> list[dict[str, Any]]:
-    """Convert internal TickSnapshots to JSON dicts matching Person 1's schema."""
+    """Convert internal TickSnapshots to JSON dicts matching the API schema."""
     from app.schemas.simulation import (
         AgentTickState as AgentTickStateSchema,
         ClaimShareRecord as ClaimShareSchema,
